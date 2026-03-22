@@ -1,5 +1,5 @@
 # crm.py - простая CRM-система
-
+#Для теста добавил коммент
 class ClientManager:
     def __init__(self):
         self.clients = {}   # словарь: имя -> email
