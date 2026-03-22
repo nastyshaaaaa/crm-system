@@ -1,3 +1,4 @@
+#TEST
 name: Run Tests
 on: [push]
 
