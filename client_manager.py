@@ -1,37 +1,29 @@
-"""Управление клиентами (рефакторинг старого crm.py)."""
+# client_manager.py (фрагмент изменений)
 from typing import Dict, List, Optional
 from models import Client
 
 class ClientManager:
-    def __init__(self) -> None:
-        self._clients: Dict[str, Client] = {}
+    def __init__(self):
+        # ключ: (owner_id, client_name) -> Client
+        self._clients: Dict[tuple, Client] = {}
 
-    def add_client(self, name: str, email: str) -> None:
-        if name in self._clients:
-            raise ValueError(f"Клиент '{name}' уже существует")
-        self._clients[name] = Client(name, email)
+    def add_client(self, owner_id: str, name: str, email: str) -> None:
+        key = (owner_id, name)
+        if key in self._clients:
+            raise ValueError(f"Клиент '{name}' уже существует для этого пользователя")
+        self._clients[key] = Client(name, email)
 
-    def get_client(self, name: str) -> Optional[Client]:
-        return self._clients.get(name)
+    def get_clients_by_owner(self, owner_id: str) -> List[Client]:
+        return [client for (oid, _), client in self._clients.items() if oid == owner_id]
 
-    def get_client_email(self, name: str) -> str:
-        if name not in self._clients:
+    def get_client_email(self, owner_id: str, name: str) -> str:
+        key = (owner_id, name)
+        if key not in self._clients:
             raise KeyError(f"Клиент '{name}' не найден")
-        return self._clients[name].email
+        return self._clients[key].email
 
-    def get_all_clients(self) -> List[Client]:
-        return list(self._clients.values())
-
-    def get_client_names(self) -> List[str]:
-        return list(self._clients.keys())
-
-    def update_client(self, name: str, new_email: Optional[str] = None) -> None:
-        if name not in self._clients:
+    def delete_client(self, owner_id: str, name: str) -> None:
+        key = (owner_id, name)
+        if key not in self._clients:
             raise KeyError(f"Клиент '{name}' не найден")
-        if new_email is not None:
-            self._clients[name].email = new_email
-
-    def delete_client(self, name: str) -> None:
-        if name not in self._clients:
-            raise KeyError(f"Клиент '{name}' не найден")
-        del self._clients[name]
+        del self._clients[key]
