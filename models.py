@@ -1,30 +1,19 @@
-"""Модели данных для CRM-системы."""
 from dataclasses import dataclass
 from enum import Enum
-
-class OrderStatus(Enum):
-    PENDING = "pending"
-    PROCESSING = "processing"
-    COMPLETED = "completed"
-    CANCELLED = "cancelled"
+import bcrypt
 
 @dataclass
-class Client:
-    name: str
+class User:
+    username: str
     email: str
+    password_hash: str
 
-    def __post_init__(self):
-        if not self.name or not self.email:
-            raise ValueError("Имя и email не могут быть пустыми")
+    @staticmethod
+    def hash_password(password: str) -> str:
+        """Хеширует пароль с помощью bcrypt."""
+        salt = bcrypt.gensalt()
+        return bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
 
-@dataclass
-class Order:
-    id: int
-    client_name: str
-    description: str
-    amount: float
-    status: OrderStatus = OrderStatus.PENDING
-
-    def __post_init__(self):
-        if self.amount <= 0:
-            raise ValueError("Сумма заказа должна быть положительной")
+    def check_password(self, password: str) -> bool:
+        """Проверяет пароль."""
+        return bcrypt.checkpw(password.encode('utf-8'), self.password_hash.encode('utf-8'))
